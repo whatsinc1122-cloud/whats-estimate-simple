@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>内装工事 概算見積もり | WHATS</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: #f3f4f6; color: #111827; min-height: 100vh; }
@@ -16,9 +17,11 @@
   .label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
   .required { color: #ef4444; }
   .input-wrap { position: relative; }
-  .input-wrap input { width: 100%; border: 1.5px solid #d1d5db; border-radius: 10px; padding: 9px 40px 9px 12px; font-size: 14px; outline: none; transition: border-color .2s; }
-  .input-wrap input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+  .input-wrap input[type="number"] { width: 100%; border: 1.5px solid #d1d5db; border-radius: 10px; padding: 9px 40px 9px 12px; font-size: 14px; outline: none; transition: border-color .2s; }
+  .input-wrap input[type="number"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
   .input-unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #9ca3af; pointer-events: none; }
+  .text-input { width: 100%; border: 1.5px solid #d1d5db; border-radius: 10px; padding: 9px 12px; font-size: 14px; outline: none; transition: border-color .2s; }
+  .text-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
   .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
   .btn-group.col3 .btn-opt { flex: 1 1 calc(33% - 6px); min-width: 80px; }
   .btn-group.col2 .btn-opt { flex: 1 1 calc(50% - 4px); }
@@ -33,6 +36,10 @@
   .submit-btn { width: 100%; background: #2563eb; color: #fff; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .2s; margin-top: 4px; }
   .submit-btn:hover { background: #1d4ed8; }
   .submit-btn:active { transform: scale(.99); }
+  .excel-btn { width: 100%; background: #1D9E75; color: #fff; border: none; border-radius: 12px; padding: 13px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; }
+  .excel-btn:hover { background: #17866300; background: #15845f; }
+  .excel-btn:active { transform: scale(.99); }
+  .excel-btn svg { width: 18px; height: 18px; }
   .result-header { background: linear-gradient(135deg, #1d4ed8, #2563eb); border-radius: 14px; padding: 24px; color: #fff; margin-bottom: 20px; }
   .result-header h2 { font-size: 14px; opacity: .85; margin-bottom: 16px; }
   .result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
@@ -69,6 +76,21 @@
 <div class="container">
   <h1>内装工事 概算見積もり</h1>
   <p class="subtitle">条件を入力すると、過去の施工事例から概算金額を算出します</p>
+
+  <!-- Excel出力用：顧客情報 -->
+  <div class="card">
+    <div class="section-title">見積書情報（Excel出力用）</div>
+    <div class="grid2">
+      <div class="field">
+        <label class="label">顧客名</label>
+        <input type="text" id="customer-name" class="text-input" placeholder="株式会社〇〇　様">
+      </div>
+      <div class="field">
+        <label class="label">店舗名</label>
+        <input type="text" id="store-name" class="text-input" placeholder="〇〇店">
+      </div>
+    </div>
+  </div>
 
   <div class="card">
     <div class="section-title">基本情報</div>
@@ -221,13 +243,20 @@
               <th>金額</th>
               <th>構成比</th>
               <th>坪単価</th>
-              <th style="display:none" class="hide-sm">実績幅</th>
             </tr>
           </thead>
           <tbody id="breakdown-body"></tbody>
           <tfoot id="breakdown-foot"></tfoot>
         </table>
       </div>
+      <!-- Excel出力ボタン -->
+      <button class="excel-btn" onclick="generateExcel()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+        </svg>
+        見積書をExcelで出力
+      </button>
     </div>
 
     <div class="card">
@@ -263,6 +292,28 @@ const CASES = [
 ];
 
 const ITEM_NAMES = ["仮設","解体","軽鉄","塗装","タイル","内装","ガラス","建具","看板","木工","床下地","衛生器具","給排水","空調","給排気","電気","照明","ガス","家具","自火報","雑工事","諸経費"];
+
+// Excel row mapping: app item name → template L column row number
+const EXCEL_ROW_MAP = {
+  '仮設':6, '解体':7, '軽鉄':10, '塗装':11, 'タイル':12,
+  '内装':13, 'ガラス':14, '建具':15, '看板':16, '木工':17,
+  '床下地':18, '衛生器具':19, '給排水':20, '空調':21, '給排気':22,
+  '電気':23, '照明':24, 'ガス':25, '家具':26, '自火報':27,
+  '雑工事':28, '諸経費':29
+};
+
+// Excel template row labels for display
+const EXCEL_ROW_LABELS = {
+  6:'仮設・クリーニング', 7:'解体工事', 8:'左官工事', 9:'金物工事',
+  10:'軽鉄下地工事', 11:'塗装工事', 12:'タイル工事', 13:'内装仕上げ工事',
+  14:'ガラス・ミラー工事', 15:'建具工事', 16:'看板・サイン工事', 17:'木工事',
+  18:'床下地工事', 19:'衛生器具', 20:'給排水工事', 21:'空調工事',
+  22:'給排気工事', 23:'電気工事', 24:'照明器具', 25:'ガス工事',
+  26:'家具・造作工事', 27:'自火報・防災', 28:'雑工事', 29:'諸経費'
+};
+
+// Global store for Excel export
+let lastResult = null;
 
 function setBtn(groupId, el) {
   document.getElementById(groupId).querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
@@ -314,7 +365,9 @@ function calculate() {
   const acM = { multi:1.2, home:0.9, reuse:0.3 }[ac] || 1.0;
   const lightM = light === 'stage' ? 1.25 : 1.0;
 
-  const breakdown = ITEM_NAMES.map(name => {
+  // Compute all item amounts (including zeros) for Excel
+  const itemAmounts = {};
+  const allBreakdown = ITEM_NAMES.map(name => {
     let wUnit = 0;
     for (const c of top4) {
       wUnit += c.items[name] * (c.score / totalScore);
@@ -325,17 +378,23 @@ function calculate() {
     if (name === 'タイル' || name === '床下地') wUnit *= floorM;
     if (name === '解体' && !demo) wUnit = 0;
     const amount = Math.round(wUnit * tsubo * areaM * condM * ceilM);
+    itemAmounts[name] = amount;
     const caseVals = CASES.map(c => c.items[name]).filter(v => v > 0);
     const minV = caseVals.length ? Math.min(...caseVals) : 0;
     const maxV = caseVals.length ? Math.max(...caseVals) : 0;
     const range = caseVals.length ? `${Math.round(minV).toLocaleString()}〜${Math.round(maxV).toLocaleString()}円/坪` : 'データなし';
     return { name, amount, range };
-  }).filter(b => b.amount > 0).sort((a,b) => b.amount - a.amount);
+  });
 
+  const breakdown = allBreakdown.filter(b => b.amount > 0).sort((a,b) => b.amount - a.amount);
   const totalEx = breakdown.reduce((s,b) => s + b.amount, 0);
   const perTsubo = Math.round(totalEx / tsubo);
   const designFee = Math.round(totalEx * 0.08);
   const totalTax = Math.round(totalEx * 1.1);
+  const taxAmount = totalTax - totalEx;
+
+  // Store for Excel export
+  lastResult = { itemAmounts, totalEx, totalTax, taxAmount, designFee, tsubo };
 
   // Update summary
   document.getElementById('r-total').innerHTML = fmt(totalEx);
@@ -396,6 +455,105 @@ function calculate() {
   const resultEl = document.getElementById('result');
   resultEl.classList.add('show');
   setTimeout(() => resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function generateExcel() {
+  if (!lastResult) { alert('先に見積もりを計算してください'); return; }
+
+  const { itemAmounts, totalEx, totalTax, taxAmount, designFee, tsubo } = lastResult;
+  const customerName = document.getElementById('customer-name').value || '　';
+  const storeName = document.getElementById('store-name').value || '　';
+
+  const today = new Date();
+  const dateStr = today.getFullYear() + '年' +
+    (today.getMonth() + 1) + '月' +
+    today.getDate() + '日';
+
+  // Create workbook
+  const wb = XLSX.utils.book_new();
+
+  // Build sheet data as array-of-arrays (rows 1-40, cols A-N)
+  // We'll use sparse cell approach for exact positioning
+  const ws = {};
+  ws['!ref'] = 'A1:N40';
+
+  // Helper to set cell
+  const sc = (ref, val, type) => {
+    ws[ref] = { v: val, t: type || (typeof val === 'number' ? 'n' : 's') };
+  };
+
+  // ── 見積書ヘッダー ──
+  sc('A1', '御　見　積　書');
+  sc('J1', dateStr);
+  sc('A3', '株式会社WHATS');
+  sc('A4', 'TEL: 03-XXXX-XXXX');
+
+  // ── 顧客情報 ──
+  sc('C7', customerName);
+  sc('C8', '店舗名：' + storeName);
+
+  // ── 合計金額 ──
+  sc('A11', '工事金額（税抜）');
+  sc('D12', totalTax);        // 税込合計
+  sc('D13', totalEx);         // 税抜合計
+  sc('D14', taxAmount);       // 消費税額
+  sc('A12', '税込合計金額');
+  sc('A13', '合計税抜金額');
+  sc('A14', '消費税額（10%）');
+
+  // ── 坪数 ──
+  sc('A19', '施工面積');
+  sc('D20', tsubo);
+  sc('E20', '坪');
+
+  // ── 工事項目（L列） ──
+  // Row labels in K column, amounts in L column
+  sc('J5', '工事項目');
+  sc('L5', '金額（円）');
+
+  for (const [row, label] of Object.entries(EXCEL_ROW_LABELS)) {
+    const r = parseInt(row);
+    sc('K' + r, label);
+    // Find matching app item
+    const appKey = Object.entries(EXCEL_ROW_MAP).find(([k, v]) => v === r)?.[0];
+    const amount = appKey ? (itemAmounts[appKey] || 0) : 0;
+    sc('L' + r, amount, 'n');
+  }
+
+  // L31 = SUM formula
+  ws['L31'] = { f: 'SUM(L6:L29)', t: 'n', v: totalEx };
+  sc('K31', '工事費合計');
+
+  // L33 = 設計費
+  sc('K33', '設計デザイン費');
+  sc('L33', designFee, 'n');
+
+  // L35 = 総合計（工事費 + 設計費）
+  sc('K35', '総合計（税別）');
+  ws['L35'] = { f: 'L31+L33', t: 'n', v: totalEx + designFee };
+  sc('K36', '消費税（10%）');
+  sc('L36', taxAmount, 'n');
+  sc('K37', '税込総合計');
+  ws['L37'] = { f: 'L35+L36', t: 'n', v: totalTax + Math.round(designFee * 0.1) };
+
+  // Column widths
+  ws['!cols'] = [
+    {wch:4},{wch:4},{wch:12},{wch:14},{wch:6},
+    {wch:6},{wch:6},{wch:6},{wch:6},{wch:6},
+    {wch:16},{wch:14}
+  ];
+
+  // Sheet name matches template
+  XLSX.utils.book_append_sheet(wb, ws, '御見積書表紙_改');
+
+  // File name
+  const storeSafe = storeName.replace(/[\s/\\:*?"<>|]/g, '_') || 'estimate';
+  const fileDate = today.getFullYear() +
+    String(today.getMonth() + 1).padStart(2, '0') +
+    String(today.getDate()).padStart(2, '0');
+  const filename = `見積書_${storeSafe}_${fileDate}.xlsx`;
+
+  XLSX.writeFile(wb, filename);
 }
 </script>
 </body>
