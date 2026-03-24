@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>内装工事 概算見積もり | WHATS</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: #f3f4f6; color: #111827; min-height: 100vh; }
+  .container { max-width: 720px; margin: 0 auto; padding: 24px 16px 80px; }
+  h1 { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 28px; }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .section-title { font-size: 15px; font-weight: 600; color: #1f2937; border-bottom: 1px solid #f3f4f6; padding-bottom: 12px; margin-bottom: 18px; }
+  .field { margin-bottom: 18px; }
+  .label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+  .required { color: #ef4444; }
+  .input-wrap { position: relative; }
+  .input-wrap input { width: 100%; border: 1.5px solid #d1d5db; border-radius: 10px; padding: 9px 40px 9px 12px; font-size: 14px; outline: none; transition: border-color .2s; }
+  .input-wrap input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+  .input-unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #9ca3af; pointer-events: none; }
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-group.col3 .btn-opt { flex: 1 1 calc(33% - 6px); min-width: 80px; }
+  .btn-group.col2 .btn-opt { flex: 1 1 calc(50% - 4px); }
+  .btn-group.col4 .btn-opt { flex: 1 1 calc(25% - 6px); min-width: 70px; }
+  .btn-opt { padding: 8px 6px; border: 1.5px solid #d1d5db; border-radius: 9px; background: #fff; font-size: 12px; font-weight: 500; color: #4b5563; cursor: pointer; transition: all .15s; text-align: center; line-height: 1.3; }
+  .btn-opt:hover { border-color: #3b82f6; color: #3b82f6; }
+  .btn-opt.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+  select { width: 100%; border: 1.5px solid #d1d5db; border-radius: 10px; padding: 9px 12px; font-size: 14px; outline: none; background: #fff; color: #111827; }
+  select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 480px) { .grid2 { grid-template-columns: 1fr; } }
+  .submit-btn { width: 100%; background: #2563eb; color: #fff; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .2s; margin-top: 4px; }
+  .submit-btn:hover { background: #1d4ed8; }
+  .submit-btn:active { transform: scale(.99); }
+  .result-header { background: linear-gradient(135deg, #1d4ed8, #2563eb); border-radius: 14px; padding: 24px; color: #fff; margin-bottom: 20px; }
+  .result-header h2 { font-size: 14px; opacity: .85; margin-bottom: 16px; }
+  .result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  @media (min-width: 540px) { .result-grid { grid-template-columns: repeat(4, 1fr); } }
+  .result-item-label { font-size: 11px; opacity: .75; margin-bottom: 3px; }
+  .result-item-value { font-size: 18px; font-weight: 700; }
+  .result-item-value.large { font-size: 22px; }
+  .result-item-value span { font-size: 12px; font-weight: 400; }
+  .result-meta { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.2); display: flex; flex-wrap: wrap; gap: 8px; }
+  .result-tag { font-size: 11px; opacity: .8; background: rgba(255,255,255,.15); padding: 3px 8px; border-radius: 20px; }
+  .breakdown-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .breakdown-table th { background: #f9fafb; color: #6b7280; font-weight: 500; padding: 8px 10px; text-align: right; border-bottom: 1px solid #f3f4f6; white-space: nowrap; }
+  .breakdown-table th:first-child { text-align: left; }
+  .breakdown-table td { padding: 8px 10px; border-bottom: 1px solid #f9fafb; text-align: right; }
+  .breakdown-table td:first-child { text-align: left; font-weight: 500; color: #374151; }
+  .breakdown-table tr:nth-child(even) td { background: #fafafa; }
+  .breakdown-table tfoot td { font-weight: 700; background: #eff6ff; color: #1d4ed8; border-top: 2px solid #dbeafe; }
+  .bar { display: inline-block; width: 48px; height: 6px; background: #e5e7eb; border-radius: 3px; vertical-align: middle; margin-right: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; background: #3b82f6; border-radius: 3px; }
+  .case-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .case-grid { grid-template-columns: 1fr; } }
+  .case-card { border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 14px; }
+  .case-badge { display: inline-block; font-size: 11px; font-weight: 600; color: #2563eb; background: #eff6ff; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; }
+  .case-name { font-size: 13px; font-weight: 600; color: #1f2937; margin-bottom: 8px; }
+  .case-vals { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .case-val-label { font-size: 11px; color: #9ca3af; }
+  .case-val { font-size: 13px; font-weight: 600; color: #1f2937; }
+  .disclaimer { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #92400e; line-height: 1.7; }
+  #result { display: none; }
+  #result.show { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>内装工事 概算見積もり</h1>
+  <p class="subtitle">条件を入力すると、過去の施工事例から概算金額を算出します</p>
+
+  <div class="card">
+    <div class="section-title">基本情報</div>
+    <div class="grid2">
+      <div class="field">
+        <label class="label">坪数 <span class="required">*</span></label>
+        <div class="input-wrap">
+          <input type="number" id="tsubo" value="20" min="5" max="200" step="0.5">
+          <span class="input-unit">坪</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">天井高</label>
+        <div class="input-wrap">
+          <input type="number" id="ceiling" value="2.4" min="2.0" max="5.0" step="0.1">
+          <span class="input-unit">m</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">工事条件</label>
+      <div class="btn-group col3" id="cond-group">
+        <button class="btn-opt active" data-val="skeleton" onclick="setBtn('cond-group',this)">スケルトン</button>
+        <button class="btn-opt" data-val="uke-large" onclick="setBtn('cond-group',this)">居抜き（大規模）</button>
+        <button class="btn-opt" data-val="uke-small" onclick="setBtn('cond-group',this)">居抜き（軽微）</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">エリア</label>
+      <div class="btn-group col4" id="area-group">
+        <button class="btn-opt active" data-val="tokyo-city" onclick="setBtn('area-group',this)">東京都心</button>
+        <button class="btn-opt" data-val="tokyo-sub" onclick="setBtn('area-group',this)">東京郊外</button>
+        <button class="btn-opt" data-val="kanagawa" onclick="setBtn('area-group',this)">神奈川・埼玉・千葉</button>
+        <button class="btn-opt" data-val="other" onclick="setBtn('area-group',this)">その他</button>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label class="label">セット面数</label>
+        <div class="input-wrap">
+          <input type="number" id="seats" value="4" min="1" max="30">
+          <span class="input-unit">面</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">解体工事</label>
+        <div class="btn-group col2" id="demo-group">
+          <button class="btn-opt" data-val="yes" onclick="setBtn('demo-group',this)">あり</button>
+          <button class="btn-opt active" data-val="no" onclick="setBtn('demo-group',this)">なし</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">仕上げ・設備</div>
+
+    <div class="field">
+      <label class="label">床仕上げ</label>
+      <div class="btn-group col3" id="floor-group">
+        <button class="btn-opt active" data-val="floor-tile" onclick="setBtn('floor-group',this)">フロアタイル</button>
+        <button class="btn-opt" data-val="ceramic" onclick="setBtn('floor-group',this)">磁器タイル</button>
+        <button class="btn-opt" data-val="other-floor" onclick="setBtn('floor-group',this)">その他</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">壁・天井仕上げ</label>
+      <select id="wall">
+        <option value="cloth">クロス（壁紙）</option>
+        <option value="paint">塗装仕上げ</option>
+        <option value="mortar">モルタル・左官</option>
+        <option value="wood">木材・板張り</option>
+      </select>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label class="label">照明</label>
+        <div class="btn-group col2" id="light-group">
+          <button class="btn-opt" data-val="stage" onclick="setBtn('light-group',this)">演出照明</button>
+          <button class="btn-opt active" data-val="standard" onclick="setBtn('light-group',this)">標準</button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">造作家具</label>
+        <div class="btn-group col3" id="furn-group">
+          <button class="btn-opt" data-val="many" onclick="setBtn('furn-group',this)">多め</button>
+          <button class="btn-opt active" data-val="standard" onclick="setBtn('furn-group',this)">標準</button>
+          <button class="btn-opt" data-val="few" onclick="setBtn('furn-group',this)">少なめ</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label class="label">空調</label>
+        <div class="btn-group" id="ac-group" style="flex-direction:column;gap:6px;">
+          <button class="btn-opt active" data-val="multi" onclick="setBtn('ac-group',this)">業務用マルチ</button>
+          <button class="btn-opt" data-val="home" onclick="setBtn('ac-group',this)">家庭用複数台</button>
+          <button class="btn-opt" data-val="reuse" onclick="setBtn('ac-group',this)">既存流用</button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">看板工事</label>
+        <div class="btn-group col2" id="sign-group">
+          <button class="btn-opt" data-val="yes" onclick="setBtn('sign-group',this)">あり</button>
+          <button class="btn-opt active" data-val="no" onclick="setBtn('sign-group',this)">なし</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="calculate()">概算見積もりを計算する</button>
+  </div>
+
+  <div id="result">
+    <div class="result-header">
+      <h2>概算見積もり結果</h2>
+      <div class="result-grid">
+        <div>
+          <div class="result-item-label">概算総額（税別）</div>
+          <div class="result-item-value large" id="r-total"></div>
+        </div>
+        <div>
+          <div class="result-item-label">坪単価</div>
+          <div class="result-item-value" id="r-per-tsubo"></div>
+        </div>
+        <div>
+          <div class="result-item-label">設計費目安</div>
+          <div class="result-item-value" id="r-design"></div>
+        </div>
+        <div>
+          <div class="result-item-label">税込総額（10%）</div>
+          <div class="result-item-value" id="r-tax"></div>
+        </div>
+      </div>
+      <div class="result-meta" id="r-meta"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">工事項目別内訳</div>
+      <div style="overflow-x:auto;">
+        <table class="breakdown-table">
+          <thead>
+            <tr>
+              <th>項目</th>
+              <th>金額</th>
+              <th>構成比</th>
+              <th>坪単価</th>
+              <th style="display:none" class="hide-sm">実績幅</th>
+            </tr>
+          </thead>
+          <tbody id="breakdown-body"></tbody>
+          <tfoot id="breakdown-foot"></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">類似施工事例（参考）</div>
+      <div class="case-grid" id="case-grid"></div>
+    </div>
+
+    <div class="disclaimer">
+      ※ この見積もりは過去の施工事例をもとにした概算です。実際の工事費用は現地調査・詳細設計により変動します。
+      正確な見積もりは担当者にご相談ください。
+    </div>
+  </div>
+</div>
+
+<script>
+const CASES = [
+  { id:"054", name:"masago（港区・30坪）", tsubo:30, cond:"skeleton", area:"tokyo-city", seats:5, total:21350000, design:1250000, ac:"multi", light:"stage", furn:"many", floor:"floor-tile",
+    items:{仮設:22007,解体:0,軽鉄:56667,塗装:42220,タイル:62907,内装:16237,ガラス:19757,建具:6180,看板:2670,木工:21350,床下地:19563,衛生器具:8610,給排水:39333,空調:120017,給排気:19343,電気:79050,照明:35153,ガス:3333,家具:117570,自火報:8200,雑工事:4447,諸経費:25333}},
+  { id:"004", name:"utuwa2号店（24坪）", tsubo:24, cond:"skeleton", area:"tokyo-sub", seats:4, total:9974060, design:1010000, ac:"multi", light:"stage", furn:"standard", floor:"floor-tile",
+    items:{仮設:21062,解体:0,軽鉄:34582,塗装:23800,タイル:0,内装:24104,ガラス:0,建具:6433,看板:0,木工:24512,床下地:14075,衛生器具:21442,給排水:25467,空調:47888,給排気:11579,電気:70767,照明:26992,ガス:0,家具:39967,自火報:0,雑工事:0,諸経費:22917}},
+  { id:"006", name:"Ursus松戸（居抜き・22坪）", tsubo:22, cond:"uke-large", area:"kanagawa", seats:4, total:5435000, design:380000, ac:"reuse", light:"standard", furn:"standard", floor:"floor-tile",
+    items:{仮設:18755,解体:15155,軽鉄:22300,塗装:14909,タイル:0,内装:38709,ガラス:0,建具:0,看板:16918,木工:0,床下地:7605,衛生器具:0,給排水:16005,空調:0,給排気:0,電気:42427,照明:11973,ガス:0,家具:37836,自火報:0,雑工事:0,諸経費:17500}},
+  { id:"013", name:"粉川様（24坪）", tsubo:24, cond:"skeleton", area:"tokyo-sub", seats:4, total:11738350, design:1060000, ac:"home", light:"stage", furn:"standard", floor:"floor-tile",
+    items:{仮設:23621,解体:2129,軽鉄:76381,塗装:31750,タイル:11708,内装:62621,ガラス:0,建具:23617,看板:1946,木工:10267,床下地:15442,衛生器具:6896,給排水:37783,空調:16179,給排気:6238,電気:33342,照明:24783,ガス:11112,家具:29817,自火報:11112,雑工事:23188,諸経費:29167}},
+  { id:"066", name:"Johnny MEN下北沢（14坪）", tsubo:14, cond:"skeleton", area:"tokyo-city", seats:2, total:11251900, design:400000, ac:"multi", light:"stage", furn:"few", floor:"ceramic",
+    items:{仮設:37771,解体:0,軽鉄:0,塗装:60407,タイル:65207,内装:0,ガラス:28314,建具:0,看板:48307,木工:73279,床下地:0,衛生器具:14779,給排水:55250,空調:70407,給排気:17957,電気:102557,照明:40171,ガス:5000,家具:28993,自火報:0,雑工事:21050,諸経費:31429}},
+  { id:"025", name:"HAREKE（居抜き・39坪）", tsubo:39, cond:"uke-large", area:"tokyo-city", seats:8, total:17575909, design:1515000, ac:"home", light:"stage", furn:"many", floor:"floor-tile",
+    items:{仮設:12528,解体:27338,軽鉄:47306,塗装:29418,タイル:7031,内装:47351,ガラス:11659,建具:0,看板:19905,木工:25774,床下地:0,衛生器具:7254,給排水:28377,空調:10300,給排気:10900,電気:48162,照明:34731,ガス:0,家具:85249,自火報:6838,雑工事:11472,諸経費:16667}},
+  { id:"140", name:"MILK表参道（21.5坪）", tsubo:21.5, cond:"skeleton", area:"tokyo-city", seats:5, total:14997200, design:960000, ac:"multi", light:"stage", furn:"many", floor:"ceramic",
+    items:{仮設:26542,解体:26396,軽鉄:33637,塗装:15409,タイル:84707,内装:16293,ガラス:43502,建具:0,看板:16470,木工:24195,床下地:0,衛生器具:17302,給排水:12512,空調:98474,給排気:0,電気:55247,照明:77721,ガス:0,家具:93107,自火報:0,雑工事:18014,諸経費:24186}},
+  { id:"056", name:"廣田様・船橋（8.9坪）", tsubo:8.9, cond:"skeleton", area:"kanagawa", seats:2, total:4859545, design:595000, ac:"reuse", light:"standard", furn:"standard", floor:"floor-tile",
+    items:{仮設:35572,解体:0,軽鉄:0,塗装:26663,タイル:19910,内装:77730,ガラス:17281,建具:0,看板:13888,木工:70182,床下地:0,衛生器具:0,給排水:46348,空調:0,給排気:0,電気:56326,照明:27730,ガス:26438,家具:66888,自火報:0,雑工事:0,諸経費:50562}}
+];
+
+const ITEM_NAMES = ["仮設","解体","軽鉄","塗装","タイル","内装","ガラス","建具","看板","木工","床下地","衛生器具","給排水","空調","給排気","電気","照明","ガス","家具","自火報","雑工事","諸経費"];
+
+function setBtn(groupId, el) {
+  document.getElementById(groupId).querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function getActive(groupId) {
+  const el = document.querySelector('#' + groupId + ' .btn-opt.active');
+  return el ? el.dataset.val : null;
+}
+
+function fmt(n) { return '¥' + Math.round(n).toLocaleString('ja-JP'); }
+
+function scoreCase(c, inp) {
+  let s = 100;
+  const diff = Math.abs(c.tsubo - inp.tsubo) / inp.tsubo;
+  s -= diff * 30;
+  if (c.cond === inp.cond) s += 25;
+  if (c.area === inp.area) s += 20;
+  if (c.ac === inp.ac) s += 10;
+  if (c.light === inp.light) s += 8;
+  if (c.furn === inp.furn) s += 7;
+  return Math.max(0, s);
+}
+
+function calculate() {
+  const tsubo = parseFloat(document.getElementById('tsubo').value) || 20;
+  const ceiling = parseFloat(document.getElementById('ceiling').value) || 2.4;
+  const cond = getActive('cond-group');
+  const area = getActive('area-group');
+  const demo = getActive('demo-group') === 'yes';
+  const floor = getActive('floor-group');
+  const light = getActive('light-group');
+  const furn = getActive('furn-group');
+  const ac = getActive('ac-group');
+  const sign = getActive('sign-group') === 'yes';
+
+  const inp = { tsubo, ceiling, cond, area, demo, floor, light, furn, ac, sign };
+
+  const scored = CASES.map(c => ({ ...c, score: scoreCase(c, inp) })).sort((a,b) => b.score - a.score);
+  const top4 = scored.slice(0, 4);
+  const totalScore = top4.reduce((s, c) => s + c.score, 0);
+
+  const areaM = { 'tokyo-city':1.15, 'tokyo-sub':1.0, 'kanagawa':0.92, 'other':0.88 }[area] || 1.0;
+  const condM = { 'skeleton':1.0, 'uke-large':0.75, 'uke-small':0.45 }[cond] || 1.0;
+  const ceilM = ceiling > 2.7 ? 1.08 : 1.0;
+  const floorM = floor === 'ceramic' ? 1.12 : 1.0;
+  const furnM = { many:1.15, standard:1.0, few:0.85 }[furn] || 1.0;
+  const acM = { multi:1.2, home:0.9, reuse:0.3 }[ac] || 1.0;
+  const lightM = light === 'stage' ? 1.25 : 1.0;
+
+  const breakdown = ITEM_NAMES.map(name => {
+    let wUnit = 0;
+    for (const c of top4) {
+      wUnit += c.items[name] * (c.score / totalScore);
+    }
+    if (name === '空調') wUnit *= acM;
+    if (name === '照明') wUnit *= lightM;
+    if (name === '家具') wUnit *= furnM;
+    if (name === 'タイル' || name === '床下地') wUnit *= floorM;
+    if (name === '解体' && !demo) wUnit = 0;
+    const amount = Math.round(wUnit * tsubo * areaM * condM * ceilM);
+    const caseVals = CASES.map(c => c.items[name]).filter(v => v > 0);
+    const minV = caseVals.length ? Math.min(...caseVals) : 0;
+    const maxV = caseVals.length ? Math.max(...caseVals) : 0;
+    const range = caseVals.length ? `${Math.round(minV).toLocaleString()}〜${Math.round(maxV).toLocaleString()}円/坪` : 'データなし';
+    return { name, amount, range };
+  }).filter(b => b.amount > 0).sort((a,b) => b.amount - a.amount);
+
+  const totalEx = breakdown.reduce((s,b) => s + b.amount, 0);
+  const perTsubo = Math.round(totalEx / tsubo);
+  const designFee = Math.round(totalEx * 0.08);
+  const totalTax = Math.round(totalEx * 1.1);
+
+  // Update summary
+  document.getElementById('r-total').innerHTML = fmt(totalEx);
+  document.getElementById('r-per-tsubo').innerHTML = fmt(perTsubo) + '<span>/坪</span>';
+  document.getElementById('r-design').innerHTML = fmt(designFee);
+  document.getElementById('r-tax').innerHTML = fmt(totalTax);
+
+  const condLabels = { skeleton:'スケルトン', 'uke-large':'居抜き（大規模）', 'uke-small':'居抜き（軽微）' };
+  const areaLabels = { 'tokyo-city':'東京都心', 'tokyo-sub':'東京郊外', kanagawa:'神奈川・埼玉・千葉', other:'その他' };
+  const acLabels = { multi:'業務用マルチ', home:'家庭用複数台', reuse:'既存流用' };
+  const lightLabels = { stage:'演出照明', standard:'標準照明' };
+  const furnLabels = { many:'家具多め', standard:'家具標準', few:'家具少なめ' };
+
+  document.getElementById('r-meta').innerHTML = [
+    tsubo + '坪', '天井高 ' + ceiling + 'm',
+    condLabels[cond], areaLabels[area],
+    acLabels[ac], lightLabels[light], furnLabels[furn]
+  ].map(t => `<span class="result-tag">${t}</span>`).join('');
+
+  // Breakdown table
+  const tbody = document.getElementById('breakdown-body');
+  tbody.innerHTML = breakdown.map(b => {
+    const ratio = totalEx > 0 ? (b.amount / totalEx * 100).toFixed(1) : '0';
+    const perT = Math.round(b.amount / tsubo).toLocaleString();
+    const pct = Math.min(parseFloat(ratio) * 2, 100);
+    return `<tr>
+      <td>${b.name}</td>
+      <td>${fmt(b.amount)}</td>
+      <td><span class="bar"><span class="bar-fill" style="width:${pct}%"></span></span>${ratio}%</td>
+      <td>¥${perT}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('breakdown-foot').innerHTML = `<tr>
+    <td>合計（税別）</td>
+    <td>${fmt(totalEx)}</td>
+    <td>100%</td>
+    <td>${fmt(perTsubo)}/坪</td>
+  </tr>`;
+
+  // Similar cases
+  document.getElementById('case-grid').innerHTML = top4.map((c, i) => `
+    <div class="case-card">
+      <span class="case-badge">#${i+1} スコア ${Math.round(c.score)}</span>
+      <div class="case-name">${c.name}</div>
+      <div class="case-vals">
+        <div>
+          <div class="case-val-label">総工事費</div>
+          <div class="case-val">${fmt(c.total)}</div>
+        </div>
+        <div>
+          <div class="case-val-label">坪単価</div>
+          <div class="case-val">${fmt(Math.round(c.total/c.tsubo))}/坪</div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  const resultEl = document.getElementById('result');
+  resultEl.classList.add('show');
+  setTimeout(() => resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+</script>
+</body>
+</html>
