@@ -369,7 +369,7 @@ function calculate() {
   const top4 = scored.slice(0, 4);
   const totalScore = top4.reduce((s, c) => s + c.score, 0);
 
-  const areaM = { 'tokyo-city':1.15, 'tokyo-sub':1.0, 'kanagawa':0.92, 'other':0.88 }[area] || 1.0;
+  const areaM = { 'tokyo-city':1.03, 'tokyo-sub':1.0, 'kanagawa':0.92, 'other':0.88 }[area] || 1.0;
   const condM = { 'skeleton':1.0, 'uke-large':0.75, 'uke-small':0.55, 'partial':0.45 }[cond] || 1.0;
   const ceilM = ceiling > 2.7 ? 1.08 : 1.0;
   const floorM = floor === 'ceramic' ? 1.12 : 1.0;
