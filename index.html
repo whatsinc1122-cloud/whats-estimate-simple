@@ -373,10 +373,11 @@ function calculate() {
   const condM = { 'skeleton':1.0, 'uke-large':0.75, 'uke-small':0.55, 'partial':0.45 }[cond] || 1.0;
   const ceilM = ceiling > 2.7 ? 1.08 : 1.0;
   const floorM = floor === 'ceramic' ? 1.12 : 1.0;
-  const furnM = { many:1.15, standard:1.0, few:0.85 }[furn] || 1.0;
   const acM = { multi:1.2, home:0.9, reuse:0.3 }[ac] || 1.0;
   const lightM = light === 'stage' ? 1.25 : 1.0;
-  const CORRECTION = 0.93; // ②補正係数
+  const CORRECTION = 0.93;
+  // 家具は造作スペック別固定基準値（特注外れ値の影響を排除）
+  const FURNITURE_BASE = { many:80000, standard:40000, few:15000 };
 
   const itemAmounts = {};
   const allBreakdown = ITEM_NAMES.map(name => {
@@ -384,7 +385,7 @@ function calculate() {
     let medUnit = (vals[1] + vals[2]) / 2 * CORRECTION;
     if (name === '空調') medUnit *= acM;
     if (name === '照明') medUnit *= lightM;
-    if (name === '家具') medUnit *= furnM;
+    if (name === '家具') medUnit = FURNITURE_BASE[furn] ?? 40000;
     if (name === 'タイル' || name === '床下地') medUnit *= floorM;
     if (name === '解体' && !demo) medUnit = 0;
     const amount = Math.round(medUnit * tsubo * areaM * condM * ceilM);
@@ -404,10 +405,10 @@ function calculate() {
   const breakdown = allBreakdown.filter(b => b.amount > 0).sort((a,b) => b.amount - a.amount);
   let totalEx = breakdown.reduce((s,b) => s + b.amount, 0);
 
-  // ①坪単価キャップ 68万円/坪
+  // 坪単価キャップ 68万円/坪（造作家具多めはキャップ対象外）
   const CAP_PER_TSUBO = 680000;
   let isCapped = false;
-  if (totalEx / tsubo > CAP_PER_TSUBO) {
+  if (furn !== 'many' && totalEx / tsubo > CAP_PER_TSUBO) {
     isCapped = true;
     const scale = (CAP_PER_TSUBO * tsubo) / totalEx;
     for (const b of breakdown) b.amount = Math.round(b.amount * scale);
